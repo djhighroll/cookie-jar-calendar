@@ -1,46 +1,74 @@
 # The Cookie Jar — Event Calendar
 
-A single-file website that lists upcoming Cookie Run community events (tournaments, parties, sign-up windows, reminders). No database, no login — you edit one list of events directly in the file.
+A single-file website with two clearly separated sides — **CookieRun Braverse (Official)** and **Michelin Star Cookies (Us)** — each with its own Discord link and its own calendar of events. People pick a side at the top, and only that side's Discord banner, "next up" event, and calendar show.
+
+Events display on an actual visual month calendar, not a scrolling list: colored dots mark event days, and tapping a date opens the details below.
 
 ## How to add or change an event
 
-1. Open `index.html` in any text editor (Notepad, TextEdit, VS Code, etc).
-2. Find the section that says `ADD YOUR EVENTS HERE` — it's near the bottom, inside the `<script>` tag.
-3. Copy one existing event block, like this:
+1. Open `index.html` in any text editor.
+2. Find `ADD YOUR EVENTS HERE` near the bottom, inside the `<script>` tag.
+3. There are two sections: `official` and `ours`. Each has two lists:
+   - `recurring` — things that repeat on the same weekday every week forever (e.g. Casual is always Wednesday, Competitive is always Saturday). List a pattern once and it fills in automatically on every matching date, no re-entry needed.
+   - `events` — one-time things with a specific date (season launches, special community days).
+
+**Recurring event example** (repeats every Wednesday):
+```
+{ weekday: 3, title: "Casual Day", type: "casual", time: "All day", desc: "Casual mode day. Happens every Wednesday." },
+```
+`weekday` is 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat.
+
+**One-time event example:**
+```
+{ title: "Competitive Weekend", date: "2026-08-08", time: "All day", type: "competitive", desc: "Competitive-mode weekend.", link: "" },
+```
+
+- `date` must be `"YYYY-MM-DD"` (one-time events only)
+- `type` must be one of: `"competitive"`, `"casual"`, `"community"`, `"milestone"`, `"tournament"`, `"party"`, `"signup"`, `"reminder"`
+- `link` can be `""`. Paste a Discord invite and the button auto-labels itself "Join Discord →"
+- `status` is optional — set it to `"predicted"` for a date you're estimating. Leave it out once it's confirmed.
+
+**To add a one-off note to a single occurrence of a recurring event** (e.g. "Casual Day, but double rewards" on one specific Wednesday): add a one-time event to `events` with the same date and the same `type` as the recurring rule — it automatically replaces the generic recurring entry for that date only, everywhere else keeps the normal pattern.
+
+4. Save the file.
+
+## Updating each side's Discord link
+
+Near the top of the script, each side has a `discord` block:
 
 ```
-{
-  title: "Webcam Tournament — Round 1",
-  date: "2026-08-15",
-  time: "3:00 PM EST",
-  type: "tournament",
-  desc: "First round matches stream live. Bring your best build.",
-  link: ""
-},
+discord: {
+  url: "https://discord.gg/yourcode",
+  updated: "2026-07-23",
+  expiresInDays: 30
+}
 ```
 
-4. Paste it anywhere inside the `EVENTS` list and change the details:
-   - `date` must be `"YYYY-MM-DD"` (e.g. August 15, 2026 → `"2026-08-15"`)
-   - `type` must be exactly one of: `"competitive"`, `"casual"`, `"themed"`, `"community"`, `"tournament"`, `"party"`, `"signup"`, `"reminder"`
-   - `link` can be left as `""` if you don't have a URL to share. Paste a Discord invite link here and the button automatically says "Join Discord →" instead of "Details →".
-   - `status` is optional. Leave it out (or set to `"confirmed"`) for official dates. Set it to `"predicted"` when you're estimating a date based on their usual pattern rather than an official post — it'll show a dashed "Predicted" tag so everyone knows it's not locked in yet. Once they confirm it, just delete that line.
-5. Save the file. That's it — the page automatically sorts events by date, highlights the soonest one at the top, and shows a "days away" countdown.
+When you regenerate an invite link, just update `url` and change `updated` to today's date — the countdown badge recalculates itself.
 
-To remove an event, delete its whole `{ ... },` block.
+## Seeing your changes before publishing
 
-## How to put this on the internet
+Just double-click `index.html` (or drag it into a browser tab). It works fully offline, exactly like the live version. Edit, save, refresh the tab — no upload needed until you're happy with it.
 
-You don't need to buy hosting for a site this simple. Two free, beginner-friendly options:
+## Publishing / updating the live site
 
-**Netlify Drop (easiest, no account needed to start)**
-1. Go to https://app.netlify.com/drop
-2. Drag the `index.html` file onto the page.
-3. You'll get a live link instantly. Create a free account to keep the link permanent and to re-upload updates later.
+1. Push `index.html` to your GitHub repository (Settings → Pages turns it into a live URL — see prior setup notes, or ask again if you need the walkthrough repeated).
+2. For future edits: open the repo on github.com, click `index.html`, click the pencil (✎) icon to edit right in the browser, then scroll down and click "Commit changes." The live site updates automatically within about a minute.
+3. For bigger edits, press `.` on the repo page to open a full code editor (github.dev) in your browser instead of the small inline box.
 
-**GitHub Pages (best if you want a stable, permanent free URL)**
-1. Create a free GitHub account and a new repository.
-2. Upload `index.html` to it.
-3. In the repository's Settings → Pages, set the source to your main branch.
-4. GitHub will give you a URL like `yourname.github.io/repo-name`.
+## Sign-up notice
 
-Either way, updating the site later just means editing the events list and re-uploading the same `index.html` file.
+The Official side has `signupHeadsUp: 7` set near the top of its config. This shows one small dashed notice card (not repeated on every date — that got cluttered fast with a weekly pattern) reminding visitors that sign-ups tend to open a set number of days ahead and to keep checking Discord. Change the number, edit the wording in `renderSignupNotice()`, or delete the `signupHeadsUp` line to turn it off for a side.
+
+## Look and feel
+
+The two sides now have genuinely different visual identities, not just a different accent color:
+
+- **CookieRun Braverse (Official)** — a scrapbook / schedule-board look: kraft paper texture, a small original cookie mascot doodle (not any official artwork), and calendar days that show colored marker-style labels (Casual, Competitive, etc.) right in the cell, similar to how the official schedule graphics look.
+- **Michelin Star Cookies (Us)** — a dark, elegant "boutique award" look with gold star accents, playing on the name. Calendar days with something happening just get a small gold star.
+
+Switching sides at the top swaps the whole background, fonts, and card styling automatically — nothing to configure.
+
+## Note on the schedule
+
+Casual (Wednesdays) and Competitive (Saturdays) now repeat automatically forever via the `recurring` list — you don't need to add them week by week. Themed events have been removed since they're not continuing. Season 3's start and the Free Learn to Play day remain as one-time entries since those are specific dates, not weekly patterns.
