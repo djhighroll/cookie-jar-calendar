@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Cookie Jar — Community Event Calendar</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%AA%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -185,7 +186,63 @@
     background-repeat: repeat-x;
   }
 
-  /* ---------- Filters ---------- */
+  /* ---------- Discord invite banner ---------- */
+  .discord-wrap{
+    max-width: 980px;
+    margin: 18px auto 0;
+    padding: 0 24px;
+  }
+  .discord-card{
+    background: #fff;
+    border: 2px solid var(--line);
+    border-radius: 22px;
+    padding: 16px 22px;
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow);
+  }
+  .discord-icon{
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--lavender);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .discord-icon svg{ width: 22px; height: 22px; }
+  .discord-text{ flex: 1; min-width: 180px; }
+  .discord-text .dt-title{
+    font-family:'Fredoka'; font-size: 1.02rem; margin:0 0 2px;
+  }
+  .discord-text .dt-sub{ font-size: 0.82rem; color: var(--cocoa-soft); }
+  .discord-cta{
+    background: var(--lavender-deep);
+    color:#fff;
+    font-family:'Fredoka';
+    font-weight: 600;
+    text-decoration:none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    white-space:nowrap;
+  }
+  .discord-cta:hover{ background: var(--strawberry-deep); }
+  .expiry-pill{
+    font-family:'Nunito';
+    font-weight: 800;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .expiry-ok{ background: #E3F3E1; color: #3C7A3F; }
+  .expiry-soon{ background: #FDECC8; color: #9A6B0A; }
+  .expiry-over{ background: #FBDADA; color: #B23A3A; }
+
+
   .filters{
     max-width: 980px;
     margin: 30px auto 0;
@@ -238,6 +295,7 @@
   }
 
   .event-card{
+    position: relative;
     display:grid;
     grid-template-columns: 88px 1fr auto;
     gap: 20px;
@@ -248,7 +306,22 @@
     padding: 16px 20px;
     margin-bottom: 14px;
     box-shadow: var(--shadow);
+    overflow: hidden;
     transition: transform .15s ease, border-color .15s ease;
+  }
+  .event-card::before{
+    content:"";
+    position:absolute;
+    top:-18px; right:-18px;
+    width: 46px; height: 46px;
+    background: linear-gradient(135deg, #fff8 0%, #fff0 40%, var(--butter) 60%, var(--strawberry) 100%);
+    transform: rotate(45deg);
+    opacity: 0.55;
+    transition: opacity .15s ease, transform .3s ease;
+  }
+  .event-card:hover::before{
+    opacity: 0.9;
+    transform: rotate(45deg) scale(1.15);
   }
   .event-card:hover{
     transform: translateY(-3px);
@@ -417,6 +490,8 @@
 
 <div class="next-up" id="next-up-wrap"></div>
 
+<div class="discord-wrap" id="discord-wrap"></div>
+
 <div class="frosting-divider"></div>
 
 <div class="filters" id="filters">
@@ -436,6 +511,27 @@
 <footer>Made with 🍪 for the community. Dates are unofficial — always double check with DevSisters' official channels.</footer>
 
 <script>
+
+/* ============================================================
+   🍪 YOUR DISCORD INVITE 🍪
+   ------------------------------------------------------------
+   This is the link shown in the banner near the top of the page.
+   Discord invite links you generate normally expire after a set
+   number of days — fill in when you grabbed it and how many days
+   it lasts, and the page calculates the countdown for you.
+
+   url          -> your invite link
+   updated      -> the date (YYYY-MM-DD) you grabbed this link
+   expiresInDays-> how many days until it expires (Discord's
+                   default options are 30, 7, 1, or "never" —
+                   use a big number like 3650 if yours never expires)
+   ============================================================ */
+
+const DISCORD_INVITE = {
+  url: "https://discord.gg/QWQAqDH6T",
+  updated: "2026-07-23",
+  expiresInDays: 30
+};
 
 /* ============================================================
    🍪 ADD YOUR EVENTS HERE 🍪
@@ -608,6 +704,42 @@ function render(){
   timeline.innerHTML = html;
 }
 
+function renderDiscordBanner(){
+  const wrap = document.getElementById("discord-wrap");
+  if(!DISCORD_INVITE || !DISCORD_INVITE.url){ wrap.innerHTML = ""; return; }
+
+  const today = startOfToday();
+  const updated = parseLocalDate(DISCORD_INVITE.updated);
+  const expiry = new Date(updated.getTime() + DISCORD_INVITE.expiresInDays * 86400000);
+  const daysLeft = Math.round((expiry - today) / 86400000);
+
+  let pillClass = "expiry-ok";
+  let pillText = `🔗 Active · expires in ${daysLeft} days`;
+  if(daysLeft <= 0){
+    pillClass = "expiry-over";
+    pillText = "⚠️ May be expired — grab a new link!";
+  } else if(daysLeft <= 5){
+    pillClass = "expiry-soon";
+    pillText = `⏳ Expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"} — renew soon`;
+  }
+
+  wrap.innerHTML = `
+    <div class="discord-card">
+      <div class="discord-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 8.5C9.5 7 14.5 7 17 8.5M7.5 15C9.8 16.3 14.2 16.3 16.5 15M8 12h.01M16 12h.01" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          <rect x="4" y="6" width="16" height="13" rx="5" stroke="white" stroke-width="1.8"/>
+        </svg>
+      </div>
+      <div class="discord-text">
+        <p class="dt-title">Join the community Discord</p>
+        <div class="dt-sub">Sign-up announcements, tournament brackets, and chat happen here.</div>
+      </div>
+      <span class="expiry-pill ${pillClass}">${pillText}</span>
+      <a class="discord-cta" href="${escapeAttr(DISCORD_INVITE.url)}" target="_blank" rel="noopener">Join Discord →</a>
+    </div>`;
+}
+
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 }
@@ -623,6 +755,7 @@ document.getElementById("filters").addEventListener("click", (ev) => {
 });
 
 render();
+renderDiscordBanner();
 </script>
 </body>
 </html>
