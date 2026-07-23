@@ -21,8 +21,9 @@ A single-file website that lists upcoming Cookie Run community events (tournamen
 
 4. Paste it anywhere inside the `EVENTS` list and change the details:
    - `date` must be `"YYYY-MM-DD"` (e.g. August 15, 2026 → `"2026-08-15"`)
-   - `type` must be exactly one of: `"tournament"`, `"party"`, `"signup"`, `"reminder"`
-   - `link` can be left as `""` if you don't have a URL to share
+   - `type` must be exactly one of: `"competitive"`, `"casual"`, `"themed"`, `"community"`, `"tournament"`, `"party"`, `"signup"`, `"reminder"`
+   - `link` can be left as `""` if you don't have a URL to share. Paste a Discord invite link here and the button automatically says "Join Discord →" instead of "Details →".
+   - `status` is optional. Leave it out (or set to `"confirmed"`) for official dates. Set it to `"predicted"` when you're estimating a date based on their usual pattern rather than an official post — it'll show a dashed "Predicted" tag so everyone knows it's not locked in yet. Once they confirm it, just delete that line.
 5. Save the file. That's it — the page automatically sorts events by date, highlights the soonest one at the top, and shows a "days away" countdown.
 
 To remove an event, delete its whole `{ ... },` block.
