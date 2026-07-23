@@ -99,9 +99,6 @@
     --t-radius: 10px;
   }
 
-  .mascot-wrap{ text-align:center; margin: 4px auto 18px; }
-  .mascot-wrap svg{ width: 64px; height: 64px; }
-
   /* ---------- OURS THEME: Michelin star / boutique award ---------- */
   body[data-theme="ours"]{
     background:
@@ -517,21 +514,7 @@ function setTheme(){
 
   const deco = document.getElementById("theme-decoration");
   if(activeSide === "official"){
-    deco.innerHTML = `<div class="mascot-wrap">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="42" fill="#D9A65B" stroke="#4A3524" stroke-width="4"/>
-        <circle cx="34" cy="40" r="4.5" fill="#4A3524"/>
-        <circle cx="66" cy="40" r="4.5" fill="#4A3524"/>
-        <circle cx="26" cy="55" r="5" fill="#8A5A2B"/>
-        <circle cx="50" cy="66" r="5" fill="#8A5A2B"/>
-        <circle cx="72" cy="52" r="5" fill="#8A5A2B"/>
-        <circle cx="40" cy="30" r="4" fill="#8A5A2B"/>
-        <circle cx="62" cy="28" r="4" fill="#8A5A2B"/>
-        <path d="M38 60 Q50 70 62 60" stroke="#4A3524" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <circle cx="26" cy="48" r="4" fill="#FF9EAE" opacity="0.7"/>
-        <circle cx="74" cy="48" r="4" fill="#FF9EAE" opacity="0.7"/>
-      </svg>
-    </div>`;
+    deco.innerHTML = `<div class="star-rule">✦ ✿ ✦ ✿ ✦</div>`;
   } else {
     deco.innerHTML = `<div class="star-rule">★ ★ ★ ★ ★</div>`;
   }
@@ -628,7 +611,7 @@ function renderSignupNotice(){
   wrap.innerHTML = `
     <div class="signup-notice">
       <span class="sn-icon">👀</span>
-      <span>Sign-ups for ${escapeHtml(s.label)} events tend to open around <strong>${s.signupHeadsUp} days</strong> in advance and aren't always announced ahead of time. It's worth checking the Discord regularly, especially in the week before a Casual or Competitive day.</span>
+      <span>Sign-ups for ${escapeHtml(s.label)} events tend to open around <strong>${s.signupHeadsUp} days</strong> in advance and aren't always announced ahead of time — worth checking the Discord regularly, especially in the week before a Casual or Competitive day.</span>
     </div>`;
 }
 
