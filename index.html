@@ -31,6 +31,12 @@
     --butter-deep: #F0AE2E;
     --lavender: #C9B6E4;
     --lavender-deep: #A88FD1;
+    --teal: #3FA9A0;
+    --coral: #FFAB91;
+    --coral-deep: #FF8A65;
+    --leaf: #8BC34A;
+    --leaf-deep: #6FA332;
+    --slate: #7C93C4;
     --line: #EAD9C0;
     --shadow: 0 6px 0 rgba(91,58,41,0.10);
   }
@@ -279,7 +285,27 @@
   .badge-tournament{ background: var(--strawberry-deep); }
   .badge-party{ background: var(--mint-deep); }
   .badge-signup{ background: var(--butter-deep); color: var(--cocoa); }
-  .badge-reminder{ background: var(--lavender-deep); }
+  .badge-reminder{ background: var(--slate); }
+  .badge-competitive{ background: var(--teal); }
+  .badge-casual{ background: var(--coral-deep); }
+  .badge-themed{ background: var(--lavender-deep); }
+  .badge-community{ background: var(--leaf-deep); }
+
+  .status-pill{
+    display:inline-block;
+    font-family:'Nunito';
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+    margin-left: 6px;
+    background: transparent;
+    border: 2px dashed var(--cocoa-soft);
+    color: var(--cocoa-soft);
+  }
 
   .event-info h3{
     margin: 0 0 4px;
@@ -395,6 +421,10 @@
 
 <div class="filters" id="filters">
   <button class="filter-btn active" data-filter="all">All events</button>
+  <button class="filter-btn" data-filter="competitive">⚔️ Competitive</button>
+  <button class="filter-btn" data-filter="casual">☁️ Casual</button>
+  <button class="filter-btn" data-filter="themed">🎨 Themed</button>
+  <button class="filter-btn" data-filter="community">🌈 Community Day</button>
   <button class="filter-btn" data-filter="tournament">🏆 Tournaments</button>
   <button class="filter-btn" data-filter="party">🎉 Parties</button>
   <button class="filter-btn" data-filter="signup">📝 Sign-ups</button>
@@ -415,46 +445,69 @@
    the page sorts everything by date automatically.
 
    FIELDS:
-   title  -> name of the event, e.g. "Webcam Tournament Round 1"
+   title  -> name of the event, e.g. "Competitive Weekend"
    date   -> "YYYY-MM-DD"  (year-month-day, always 2 digits)
    time   -> whatever text you want shown, e.g. "3:00 PM EST"
-   type   -> one of: "tournament", "party", "signup", "reminder"
+   type   -> one of: "competitive", "casual", "themed", "community",
+             "tournament", "party", "signup", "reminder"
    desc   -> a short sentence about the event
-   link   -> a URL people can click for more info (or "" for none)
+   link   -> a URL people can click (Discord invite, sign-up page,
+             announcement post, etc). Leave as "" for none.
+             If the URL contains "discord", the button
+             automatically says "Join Discord →" instead of
+             "Details →".
+   status -> "confirmed" or "predicted". OPTIONAL — if you leave
+             it out, it's treated as "confirmed".
+             Use "predicted" when you're marking a date based on
+             the pattern (since they don't announce in advance)
+             — it'll show a dashed "Predicted" tag next to the
+             event so everyone knows it's your best guess, not
+             official yet. Once they confirm it, just delete the
+             status line (or change it to "confirmed").
    ============================================================ */
 
 const EVENTS = [
   {
-    title: "Cookie Run Webcam Tournament — Sign-ups Open",
+    title: "Signups Likely Open",
     date: "2026-08-01",
-    time: "12:00 PM EST",
+    time: "Time TBD",
     type: "signup",
-    desc: "Registration window opens for the next webcam tournament bracket. Get your entry in early.",
+    desc: "Based on the usual pattern, this is when sign-ups probably open. Not officially announced yet.",
+    link: "https://discord.gg/yourservercode",
+    status: "predicted"
+  },
+  {
+    title: "Competitive Weekend",
+    date: "2026-08-08",
+    time: "All day",
+    type: "competitive",
+    desc: "Competitive-mode weekend, per the official schedule.",
+    link: "https://discord.gg/yourservercode"
+  },
+  {
+    title: "Themed Event",
+    date: "2026-08-12",
+    time: "All day",
+    type: "themed",
+    desc: "Themed event day.",
     link: ""
   },
   {
-    title: "Webcam Tournament — Round 1",
+    title: "FREE — Learn to Play Community Day",
     date: "2026-08-15",
-    time: "3:00 PM EST",
-    type: "tournament",
-    desc: "First round matches stream live. Bring your best build.",
-    link: ""
+    time: "All day",
+    type: "community",
+    desc: "Open, free community day for newer players to learn the ropes.",
+    link: "https://discord.gg/yourservercode"
   },
   {
-    title: "Cookie Run Community Party",
-    date: "2026-08-22",
-    time: "6:00 PM EST",
-    type: "party",
-    desc: "Casual hangout, mini-games, and giveaways for the community.",
-    link: ""
-  },
-  {
-    title: "Sign-up Deadline Reminder",
-    date: "2026-08-28",
+    title: "Sign-up Deadline (Predicted)",
+    date: "2026-08-27",
     time: "11:59 PM EST",
     type: "reminder",
-    desc: "Last call — registrations close at midnight for the next event cycle.",
-    link: ""
+    desc: "Estimated cutoff based on past cycles — confirm once they post the official announcement.",
+    link: "",
+    status: "predicted"
   }
 ];
 
@@ -464,7 +517,10 @@ const EVENTS = [
 
 const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const BADGE_LABEL = { tournament:"Tournament", party:"Party", signup:"Sign-up", reminder:"Reminder" };
+const BADGE_LABEL = {
+  tournament:"Tournament", party:"Party", signup:"Sign-up", reminder:"Reminder",
+  competitive:"Competitive", casual:"Casual", themed:"Themed", community:"Community Day"
+};
 
 function parseLocalDate(str){
   const [y,m,d] = str.split("-").map(Number);
@@ -538,13 +594,14 @@ function render(){
         </div>
         <div class="event-info">
           <span class="type-badge badge-${e.type}">${BADGE_LABEL[e.type] || e.type}</span>
+          ${e.status === "predicted" ? `<span class="status-pill">🔮 Predicted</span>` : ""}
           <h3>${escapeHtml(e.title)}</h3>
           <div class="time">${escapeHtml(e.time)}</div>
           <p>${escapeHtml(e.desc)}</p>
         </div>
         <div class="event-side">
           <div class="days-away">${daysAwayText(d, today)}</div>
-          ${e.link ? `<a class="event-link" href="${escapeAttr(e.link)}" target="_blank" rel="noopener">Details →</a>` : ""}
+          ${e.link ? `<a class="event-link" href="${escapeAttr(e.link)}" target="_blank" rel="noopener">${e.link.toLowerCase().includes("discord") ? "Join Discord →" : "Details →"}</a>` : ""}
         </div>
       </div>`;
   });
