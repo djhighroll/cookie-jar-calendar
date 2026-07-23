@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Cookie Jar — Community Event Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     ✦ THE ONLY SECTION YOU NEED TO TOUCH ✦
+     ------------------------------------------------------------
+     Add, edit, or remove events in the EVENTS list further down
+     in the <script> at the bottom of this file (look for the
+     big comment block that says "ADD YOUR EVENTS HERE").
+     You do not need to touch anything else in this file.
+     ============================================================ */
+
+  :root{
+    --cream: #FFF7EC;
+    --cream-deep: #FBEBD6;
+    --cocoa: #5B3A29;
+    --cocoa-soft: #8A6650;
+    --strawberry: #FF8FA3;
+    --strawberry-deep: #FF6B88;
+    --mint: #8FD8C0;
+    --mint-deep: #5FBFA0;
+    --butter: #FFC857;
+    --butter-deep: #F0AE2E;
+    --lavender: #C9B6E4;
+    --lavender-deep: #A88FD1;
+    --line: #EAD9C0;
+    --shadow: 0 6px 0 rgba(91,58,41,0.10);
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 10% 8%, var(--cream-deep) 0%, transparent 40%),
+      radial-gradient(circle at 92% 18%, var(--cream-deep) 0%, transparent 35%);
+    font-family: 'Nunito', sans-serif;
+    color: var(--cocoa);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,h2,h3, .display{
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  a { color: inherit; }
+
+  /* ---------- Sprinkle top bar ---------- */
+  .sprinkle-bar{
+    height: 10px;
+    width: 100%;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--strawberry) 0 22px,
+      var(--butter) 22px 44px,
+      var(--mint) 44px 66px,
+      var(--lavender) 66px 88px
+    );
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 56px 24px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .hero-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background: var(--cream-deep);
+    border: 2px dashed var(--butter-deep);
+    color: var(--cocoa-soft);
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+  }
+
+  .hero h1{
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+    line-height: 1.05;
+    margin: 0 0 14px;
+    color: var(--cocoa);
+  }
+  .hero h1 span{ color: var(--strawberry-deep); }
+
+  .hero p{
+    font-size: 1.05rem;
+    color: var(--cocoa-soft);
+    max-width: 46ch;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .jar-wrap{ width: 190px; }
+  .jar-wrap svg{ width: 100%; height: auto; display:block; }
+
+  @keyframes floaty{
+    0%,100%{ transform: translateY(0px) rotate(0deg); }
+    50%{ transform: translateY(-6px) rotate(-2deg); }
+  }
+  .jar-cookie{ animation: floaty 3.2s ease-in-out infinite; transform-origin: center; }
+  .jar-cookie:nth-child(2){ animation-delay: .4s; }
+  .jar-cookie:nth-child(3){ animation-delay: .8s; }
+
+  /* ---------- Next up banner ---------- */
+  .next-up{
+    max-width: 980px;
+    margin: 8px auto 0;
+    padding: 0 24px;
+  }
+  .next-up-card{
+    background: var(--cocoa);
+    color: var(--cream);
+    border-radius: 26px;
+    padding: 22px 28px;
+    display:flex;
+    align-items:center;
+    gap: 20px;
+    box-shadow: var(--shadow);
+    flex-wrap: wrap;
+  }
+  .next-up-card .label{
+    font-family:'Fredoka', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--butter);
+    display:block;
+    margin-bottom: 4px;
+  }
+  .next-up-card .title{
+    font-family:'Fredoka', sans-serif;
+    font-size: 1.25rem;
+    margin: 0;
+  }
+  .next-up-card .when{
+    color: #E9D8C4;
+    font-size: 0.92rem;
+    margin-top: 2px;
+  }
+  .countdown-pill{
+    margin-left: auto;
+    background: var(--strawberry);
+    color: #fff;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  /* ---------- Scalloped divider (frosting drip) ---------- */
+  .frosting-divider{
+    width: 100%;
+    height: 26px;
+    margin-top: 44px;
+    background-image: radial-gradient(circle at 10px 0, transparent 12px, var(--cream-deep) 13px);
+    background-size: 24px 24px;
+    background-repeat: repeat-x;
+  }
+
+  /* ---------- Filters ---------- */
+  .filters{
+    max-width: 980px;
+    margin: 30px auto 0;
+    padding: 0 24px;
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .filter-btn{
+    border: 2px solid var(--line);
+    background: #fff;
+    color: var(--cocoa-soft);
+    font-family:'Nunito';
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .filter-btn:hover{ border-color: var(--strawberry-deep); color: var(--strawberry-deep); }
+  .filter-btn.active{
+    background: var(--cocoa);
+    border-color: var(--cocoa);
+    color: var(--cream);
+  }
+
+  /* ---------- Timeline ---------- */
+  .timeline{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 30px 24px 100px;
+  }
+
+  .month-heading{
+    font-family:'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    color: var(--strawberry-deep);
+    margin: 40px 0 16px;
+    display:flex;
+    align-items:center;
+    gap: 12px;
+  }
+  .month-heading:first-child{ margin-top: 0; }
+  .month-heading::after{
+    content:"";
+    flex:1;
+    height: 2px;
+    background: var(--line);
+  }
+
+  .event-card{
+    display:grid;
+    grid-template-columns: 88px 1fr auto;
+    gap: 20px;
+    align-items:center;
+    background: #fff;
+    border: 2px solid var(--line);
+    border-radius: 20px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .event-card:hover{
+    transform: translateY(-3px);
+    border-color: var(--strawberry);
+  }
+  .event-card.past{
+    opacity: 0.5;
+  }
+
+  .date-chip{
+    background: var(--cream-deep);
+    border-radius: 14px;
+    text-align:center;
+    padding: 10px 4px;
+    font-family:'Fredoka', sans-serif;
+    color: var(--cocoa);
+  }
+  .date-chip .dow{ font-size: 0.68rem; text-transform:uppercase; color: var(--cocoa-soft); font-weight:600; }
+  .date-chip .dnum{ font-size: 1.5rem; font-weight: 600; line-height:1.1; }
+  .date-chip .mon{ font-size: 0.7rem; text-transform:uppercase; color: var(--cocoa-soft); }
+
+  .event-info .type-badge{
+    display:inline-block;
+    font-family:'Fredoka';
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+  .badge-tournament{ background: var(--strawberry-deep); }
+  .badge-party{ background: var(--mint-deep); }
+  .badge-signup{ background: var(--butter-deep); color: var(--cocoa); }
+  .badge-reminder{ background: var(--lavender-deep); }
+
+  .event-info h3{
+    margin: 0 0 4px;
+    font-size: 1.08rem;
+  }
+  .event-info .time{
+    font-size: 0.85rem;
+    color: var(--cocoa-soft);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .event-info p{
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--cocoa-soft);
+    line-height:1.45;
+  }
+
+  .event-side{
+    text-align:right;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:8px;
+  }
+  .days-away{
+    font-family:'Fredoka';
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--strawberry-deep);
+    white-space:nowrap;
+  }
+  .event-link{
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-decoration: none;
+    color: var(--cocoa);
+    border-bottom: 2px solid var(--butter);
+    white-space:nowrap;
+  }
+  .event-link:hover{ color: var(--strawberry-deep); border-color: var(--strawberry-deep); }
+
+  .empty-state{
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--cocoa-soft);
+  }
+  .empty-state .display{ font-size:1.3rem; color:var(--cocoa); margin-bottom:6px; }
+
+  footer{
+    text-align:center;
+    padding: 30px 20px 50px;
+    color: var(--cocoa-soft);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 720px){
+    .hero{ grid-template-columns: 1fr; text-align:center; }
+    .hero p{ margin: 0 auto; }
+    .jar-wrap{ margin: 0 auto; width: 130px; }
+    .event-card{ grid-template-columns: 64px 1fr; }
+    .event-side{ grid-column: 1 / -1; flex-direction:row; justify-content:space-between; align-items:center; margin-top: 6px; }
+    .countdown-pill{ margin-left: 0; }
+    .next-up-card{ flex-direction:column; align-items:flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .jar-cookie{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sprinkle-bar"></div>
+
+<div class="hero">
+  <div>
+    <span class="hero-eyebrow">🍪 Community Kept, Community Fed</span>
+    <h1>Every party, every<br><span>tournament</span>, one jar.</h1>
+    <p>A running list of upcoming sign-up windows, webcam tournaments, and community parties — so nobody has to guess when the next date drops.</p>
+  </div>
+  <div class="jar-wrap">
+    <svg viewBox="0 0 160 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="80" cy="190" rx="46" ry="8" fill="#5B3A29" opacity="0.12"/>
+      <rect x="34" y="46" width="92" height="128" rx="20" fill="#FFF2DE" stroke="#5B3A29" stroke-width="4"/>
+      <rect x="30" y="30" width="100" height="24" rx="10" fill="#FF8FA3" stroke="#5B3A29" stroke-width="4"/>
+      <rect x="54" y="14" width="52" height="18" rx="6" fill="#8FD8C0" stroke="#5B3A29" stroke-width="4"/>
+      <g class="jar-cookie">
+        <circle cx="62" cy="90" r="15" fill="#F0AE2E" stroke="#5B3A29" stroke-width="3"/>
+        <circle cx="57" cy="86" r="2" fill="#5B3A29"/>
+        <circle cx="67" cy="92" r="2" fill="#5B3A29"/>
+        <circle cx="60" cy="96" r="2" fill="#5B3A29"/>
+      </g>
+      <g class="jar-cookie">
+        <circle cx="98" cy="110" r="17" fill="#FF6B88" stroke="#5B3A29" stroke-width="3"/>
+        <circle cx="92" cy="105" r="2.2" fill="#5B3A29"/>
+        <circle cx="104" cy="108" r="2.2" fill="#5B3A29"/>
+        <circle cx="96" cy="116" r="2.2" fill="#5B3A29"/>
+      </g>
+      <g class="jar-cookie">
+        <circle cx="70" cy="138" r="16" fill="#A88FD1" stroke="#5B3A29" stroke-width="3"/>
+        <circle cx="64" cy="134" r="2.1" fill="#5B3A29"/>
+        <circle cx="76" cy="136" r="2.1" fill="#5B3A29"/>
+        <circle cx="68" cy="144" r="2.1" fill="#5B3A29"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="next-up" id="next-up-wrap"></div>
+
+<div class="frosting-divider"></div>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all">All events</button>
+  <button class="filter-btn" data-filter="tournament">🏆 Tournaments</button>
+  <button class="filter-btn" data-filter="party">🎉 Parties</button>
+  <button class="filter-btn" data-filter="signup">📝 Sign-ups</button>
+  <button class="filter-btn" data-filter="reminder">⏰ Reminders</button>
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+<footer>Made with 🍪 for the community. Dates are unofficial — always double check with DevSisters' official channels.</footer>
+
+<script>
+
+/* ============================================================
+   🍪 ADD YOUR EVENTS HERE 🍪
+   ------------------------------------------------------------
+   Copy one block below (from the { to the },) and edit it.
+   Then paste it anywhere in the list. Order doesn't matter —
+   the page sorts everything by date automatically.
+
+   FIELDS:
+   title  -> name of the event, e.g. "Webcam Tournament Round 1"
+   date   -> "YYYY-MM-DD"  (year-month-day, always 2 digits)
+   time   -> whatever text you want shown, e.g. "3:00 PM EST"
+   type   -> one of: "tournament", "party", "signup", "reminder"
+   desc   -> a short sentence about the event
+   link   -> a URL people can click for more info (or "" for none)
+   ============================================================ */
+
+const EVENTS = [
+  {
+    title: "Cookie Run Webcam Tournament — Sign-ups Open",
+    date: "2026-08-01",
+    time: "12:00 PM EST",
+    type: "signup",
+    desc: "Registration window opens for the next webcam tournament bracket. Get your entry in early.",
+    link: ""
+  },
+  {
+    title: "Webcam Tournament — Round 1",
+    date: "2026-08-15",
+    time: "3:00 PM EST",
+    type: "tournament",
+    desc: "First round matches stream live. Bring your best build.",
+    link: ""
+  },
+  {
+    title: "Cookie Run Community Party",
+    date: "2026-08-22",
+    time: "6:00 PM EST",
+    type: "party",
+    desc: "Casual hangout, mini-games, and giveaways for the community.",
+    link: ""
+  },
+  {
+    title: "Sign-up Deadline Reminder",
+    date: "2026-08-28",
+    time: "11:59 PM EST",
+    type: "reminder",
+    desc: "Last call — registrations close at midnight for the next event cycle.",
+    link: ""
+  }
+];
+
+/* ============================================================
+   Nothing below this line needs to be edited.
+   ============================================================ */
+
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const BADGE_LABEL = { tournament:"Tournament", party:"Party", signup:"Sign-up", reminder:"Reminder" };
+
+function parseLocalDate(str){
+  const [y,m,d] = str.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+
+function startOfToday(){
+  const t = new Date();
+  return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+}
+
+function daysAwayText(target, today){
+  const diff = Math.round((target - today) / 86400000);
+  if(diff === 0) return "Today!";
+  if(diff === 1) return "Tomorrow";
+  if(diff > 1) return `In ${diff} days`;
+  if(diff === -1) return "Yesterday";
+  return `${Math.abs(diff)} days ago`;
+}
+
+let activeFilter = "all";
+
+function render(){
+  const today = startOfToday();
+  const sorted = [...EVENTS].sort((a,b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+
+  // Next up banner: soonest event that is today or in the future
+  const upcoming = sorted.filter(e => parseLocalDate(e.date) >= today);
+  const nextUpWrap = document.getElementById("next-up-wrap");
+  if(upcoming.length){
+    const n = upcoming[0];
+    const nd = parseLocalDate(n.date);
+    nextUpWrap.innerHTML = `
+      <div class="next-up-card">
+        <div>
+          <span class="label">Next up</span>
+          <p class="title">${escapeHtml(n.title)}</p>
+          <div class="when">${nd.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'})} · ${escapeHtml(n.time)}</div>
+        </div>
+        <div class="countdown-pill">${daysAwayText(nd, today)}</div>
+      </div>`;
+  } else {
+    nextUpWrap.innerHTML = "";
+  }
+
+  // Filtered list
+  const filtered = sorted.filter(e => activeFilter === "all" || e.type === activeFilter);
+
+  const timeline = document.getElementById("timeline");
+  if(!filtered.length){
+    timeline.innerHTML = `<div class="empty-state"><div class="display">The jar is empty 🍪</div><p>No events in this category yet.</p></div>`;
+    return;
+  }
+
+  let html = "";
+  let lastMonthKey = "";
+  filtered.forEach(e => {
+    const d = parseLocalDate(e.date);
+    const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+    if(monthKey !== lastMonthKey){
+      html += `<div class="month-heading">${MON[d.getMonth()]} ${d.getFullYear()}</div>`;
+      lastMonthKey = monthKey;
+    }
+    const isPast = d < today;
+    html += `
+      <div class="event-card ${isPast ? "past" : ""}">
+        <div class="date-chip">
+          <div class="dow">${DOW[d.getDay()]}</div>
+          <div class="dnum">${d.getDate()}</div>
+          <div class="mon">${MON[d.getMonth()].slice(0,3)}</div>
+        </div>
+        <div class="event-info">
+          <span class="type-badge badge-${e.type}">${BADGE_LABEL[e.type] || e.type}</span>
+          <h3>${escapeHtml(e.title)}</h3>
+          <div class="time">${escapeHtml(e.time)}</div>
+          <p>${escapeHtml(e.desc)}</p>
+        </div>
+        <div class="event-side">
+          <div class="days-away">${daysAwayText(d, today)}</div>
+          ${e.link ? `<a class="event-link" href="${escapeAttr(e.link)}" target="_blank" rel="noopener">Details →</a>` : ""}
+        </div>
+      </div>`;
+  });
+  timeline.innerHTML = html;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+
+document.getElementById("filters").addEventListener("click", (ev) => {
+  const btn = ev.target.closest(".filter-btn");
+  if(!btn) return;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  activeFilter = btn.dataset.filter;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
