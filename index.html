@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Cookie Jar — Community Event Calendar</title>
+<title>The Cookie Jar — Event Calendar</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%AA%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chewy&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 
   /* ============================================================
      ✦ THE ONLY SECTION YOU NEED TO TOUCH ✦
      ------------------------------------------------------------
-     Add, edit, or remove events in the EVENTS list further down
-     in the <script> at the bottom of this file (look for the
-     big comment block that says "ADD YOUR EVENTS HERE").
-     You do not need to touch anything else in this file.
+     Scroll to the bottom of this file, to the <script> tag, and
+     look for "ADD YOUR EVENTS HERE". Everything above that is
+     styling and doesn't need to change.
      ============================================================ */
 
   :root{
@@ -24,429 +23,293 @@
     --cream-deep: #FBEBD6;
     --cocoa: #5B3A29;
     --cocoa-soft: #8A6650;
-    --strawberry: #FF8FA3;
-    --strawberry-deep: #FF6B88;
-    --mint: #8FD8C0;
-    --mint-deep: #5FBFA0;
-    --butter: #FFC857;
-    --butter-deep: #F0AE2E;
-    --lavender: #C9B6E4;
-    --lavender-deep: #A88FD1;
-    --teal: #3FA9A0;
-    --coral: #FFAB91;
-    --coral-deep: #FF8A65;
-    --leaf: #8BC34A;
-    --leaf-deep: #6FA332;
-    --slate: #7C93C4;
     --line: #EAD9C0;
-    --shadow: 0 6px 0 rgba(91,58,41,0.10);
+
+    /* Neutral "lobby" accent (used before/around the themed area) */
+    --side-accent: #A88FD1;
   }
 
   *{ box-sizing: border-box; }
 
+  html, body{ height: 100%; }
   body{
     margin:0;
     background: var(--cream);
     background-image:
       radial-gradient(circle at 10% 8%, var(--cream-deep) 0%, transparent 40%),
-      radial-gradient(circle at 92% 18%, var(--cream-deep) 0%, transparent 35%);
+      radial-gradient(circle at 92% 12%, var(--cream-deep) 0%, transparent 35%);
     font-family: 'Nunito', sans-serif;
     color: var(--cocoa);
     -webkit-font-smoothing: antialiased;
+    transition: background 0.4s ease;
   }
 
-  h1,h2,h3, .display{
-    font-family: 'Fredoka', sans-serif;
-  }
-
+  h1,h2,h3{ font-family: 'Fredoka', sans-serif; }
   a { color: inherit; }
 
-  /* ---------- Sprinkle top bar ---------- */
   .sprinkle-bar{
-    height: 10px;
-    width: 100%;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--strawberry) 0 22px,
-      var(--butter) 22px 44px,
-      var(--mint) 44px 66px,
-      var(--lavender) 66px 88px
-    );
+    height: 8px; width: 100%;
+    background: repeating-linear-gradient(90deg,
+      #FF8FA3 0 22px, #FFC857 22px 44px, #8FD8C0 44px 66px, #C9B6E4 66px 88px);
   }
 
-  /* ---------- Hero ---------- */
-  .hero{
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 56px 24px 24px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 32px;
-    align-items: center;
+  .wrap{ max-width: 880px; margin: 0 auto; padding: 0 20px 60px; }
+
+  .page-head{ text-align:center; padding: 34px 20px 6px; }
+  .page-head h1{ font-size: clamp(1.7rem, 4vw, 2.3rem); margin: 0 0 4px; }
+  .page-head p{ color: var(--cocoa-soft); margin: 0; font-size: 0.95rem; }
+
+  /* ---------- Side switcher (neutral lobby) ---------- */
+  .side-switch{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 26px 0 0; }
+  .side-btn{
+    border: 3px solid var(--line); background: #fff; border-radius: 20px;
+    padding: 16px 14px; cursor: pointer; text-align:center;
+    font-family:'Fredoka'; transition: all .15s ease;
+  }
+  .side-btn .sb-icon{ font-size: 1.5rem; display:block; margin-bottom: 4px; }
+  .side-btn .sb-label{ font-size: 1rem; color: var(--cocoa); }
+  .side-btn .sb-sub{ font-family:'Nunito'; font-weight:700; font-size: 0.72rem; color: var(--cocoa-soft); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+  .side-btn:hover{ transform: translateY(-2px); }
+  .side-btn.active{ border-color: var(--side-accent); background: color-mix(in srgb, var(--side-accent) 12%, white); box-shadow: 0 6px 0 rgba(0,0,0,0.08); }
+
+  /* ============================================================
+     THEME REGION — everything below the side switcher restyles
+     completely depending on which side is active. Set via
+     body[data-theme="official"] or body[data-theme="ours"].
+     ============================================================ */
+
+  .theme-region{ margin-top: 18px; }
+
+  /* ---------- OFFICIAL THEME: scrapbook / schedule board ---------- */
+  body[data-theme="official"]{
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px),
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.5) 0, transparent 2%),
+      radial-gradient(circle at 80% 10%, rgba(255,255,255,0.4) 0, transparent 2%),
+      radial-gradient(circle at 60% 70%, rgba(255,255,255,0.4) 0, transparent 2%),
+      radial-gradient(circle at 30% 85%, rgba(255,255,255,0.4) 0, transparent 2%),
+      #E6CE9F;
+  }
+  body[data-theme="official"] .theme-region{
+    --t-card: #FFF9EC;
+    --t-ink: #4A3524;
+    --t-ink-soft: #8A6650;
+    --t-border: #C9A96B;
+    --t-heading: 'Chewy', 'Fredoka', sans-serif;
+    --t-radius: 10px;
   }
 
-  .hero-eyebrow{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    background: var(--cream-deep);
-    border: 2px dashed var(--butter-deep);
-    color: var(--cocoa-soft);
-    font-weight: 800;
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 999px;
-    margin-bottom: 18px;
+  .mascot-wrap{ text-align:center; margin: 4px auto 18px; }
+  .mascot-wrap svg{ width: 64px; height: 64px; }
+
+  /* ---------- OURS THEME: Michelin star / boutique award ---------- */
+  body[data-theme="ours"]{
+    background:
+      radial-gradient(circle at 12% 15%, rgba(255,255,255,0.06) 0, transparent 1.4%),
+      radial-gradient(circle at 82% 25%, rgba(255,255,255,0.06) 0, transparent 1.4%),
+      radial-gradient(circle at 40% 70%, rgba(255,255,255,0.05) 0, transparent 1.4%),
+      radial-gradient(circle at 70% 88%, rgba(255,255,255,0.05) 0, transparent 1.4%),
+      radial-gradient(circle at 25% 92%, rgba(255,255,255,0.05) 0, transparent 1.4%),
+      #2E1F2E;
+  }
+  body[data-theme="ours"] .theme-region{
+    --t-card: #3A2839;
+    --t-ink: #F4E9DE;
+    --t-ink-soft: #C9AFC0;
+    --t-border: #6B4F63;
+    --t-heading: 'Fraunces', serif;
+    --t-radius: 6px;
+  }
+  body[data-theme="ours"] .page-head,
+  body[data-theme="ours"] .page-head p{ color: #F4E9DE; }
+  body[data-theme="ours"] .page-head p{ color: #C9AFC0; }
+  body[data-theme="ours"] .side-btn{ background: #3A2839; border-color: #6B4F63; }
+  body[data-theme="ours"] .side-btn .sb-label{ color: #F4E9DE; }
+  body[data-theme="ours"] .side-btn .sb-sub{ color: #C9AFC0; }
+
+  .star-rule{
+    text-align:center; color: var(--side-accent); letter-spacing: 6px;
+    font-size: 0.75rem; margin: 4px 0 18px;
   }
 
-  .hero h1{
-    font-size: clamp(2.1rem, 5vw, 3.2rem);
-    line-height: 1.05;
-    margin: 0 0 14px;
-    color: var(--cocoa);
-  }
-  .hero h1 span{ color: var(--strawberry-deep); }
-
-  .hero p{
-    font-size: 1.05rem;
-    color: var(--cocoa-soft);
-    max-width: 46ch;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .jar-wrap{ width: 190px; }
-  .jar-wrap svg{ width: 100%; height: auto; display:block; }
-
-  @keyframes floaty{
-    0%,100%{ transform: translateY(0px) rotate(0deg); }
-    50%{ transform: translateY(-6px) rotate(-2deg); }
-  }
-  .jar-cookie{ animation: floaty 3.2s ease-in-out infinite; transform-origin: center; }
-  .jar-cookie:nth-child(2){ animation-delay: .4s; }
-  .jar-cookie:nth-child(3){ animation-delay: .8s; }
-
-  /* ---------- Next up banner ---------- */
-  .next-up{
-    max-width: 980px;
-    margin: 8px auto 0;
-    padding: 0 24px;
-  }
-  .next-up-card{
-    background: var(--cocoa);
-    color: var(--cream);
-    border-radius: 26px;
-    padding: 22px 28px;
-    display:flex;
-    align-items:center;
-    gap: 20px;
-    box-shadow: var(--shadow);
-    flex-wrap: wrap;
-  }
-  .next-up-card .label{
-    font-family:'Fredoka', sans-serif;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--butter);
-    display:block;
-    margin-bottom: 4px;
-  }
-  .next-up-card .title{
-    font-family:'Fredoka', sans-serif;
-    font-size: 1.25rem;
-    margin: 0;
-  }
-  .next-up-card .when{
-    color: #E9D8C4;
-    font-size: 0.92rem;
-    margin-top: 2px;
-  }
-  .countdown-pill{
-    margin-left: auto;
-    background: var(--strawberry);
-    color: #fff;
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 0.95rem;
-    white-space: nowrap;
-  }
-
-  /* ---------- Scalloped divider (frosting drip) ---------- */
-  .frosting-divider{
-    width: 100%;
-    height: 26px;
-    margin-top: 44px;
-    background-image: radial-gradient(circle at 10px 0, transparent 12px, var(--cream-deep) 13px);
-    background-size: 24px 24px;
-    background-repeat: repeat-x;
-  }
-
-  /* ---------- Discord invite banner ---------- */
-  .discord-wrap{
-    max-width: 980px;
-    margin: 18px auto 0;
-    padding: 0 24px;
-  }
+  /* ---------- Discord banner (themed) ---------- */
   .discord-card{
-    background: #fff;
-    border: 2px solid var(--line);
-    border-radius: 22px;
-    padding: 16px 22px;
-    display:flex;
-    align-items:center;
-    gap: 16px;
-    flex-wrap: wrap;
-    box-shadow: var(--shadow);
+    background: var(--t-card, #fff);
+    border: 2px solid var(--t-border, var(--line));
+    color: var(--t-ink, var(--cocoa));
+    border-radius: var(--t-radius, 20px);
+    padding: 14px 20px;
+    display:flex; align-items:center; gap: 14px; flex-wrap: wrap;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.08);
   }
   .discord-icon{
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    background: var(--lavender);
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0;
+    width: 38px; height: 38px; border-radius: 11px;
+    background: var(--side-accent);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
-  .discord-icon svg{ width: 22px; height: 22px; }
-  .discord-text{ flex: 1; min-width: 180px; }
-  .discord-text .dt-title{
-    font-family:'Fredoka'; font-size: 1.02rem; margin:0 0 2px;
-  }
-  .discord-text .dt-sub{ font-size: 0.82rem; color: var(--cocoa-soft); }
+  .discord-icon svg{ width: 20px; height: 20px; }
+  .discord-text{ flex: 1; min-width: 160px; }
+  .discord-text .dt-title{ font-family: var(--t-heading, 'Fredoka'); font-size: 1rem; margin:0; }
+  .discord-text .dt-sub{ font-size: 0.8rem; color: var(--t-ink-soft, var(--cocoa-soft)); }
   .discord-cta{
-    background: var(--lavender-deep);
-    color:#fff;
-    font-family:'Fredoka';
-    font-weight: 600;
-    text-decoration:none;
-    padding: 10px 20px;
-    border-radius: 999px;
-    font-size: 0.92rem;
-    white-space:nowrap;
+    background: var(--side-accent); color:#fff; font-family: 'Fredoka'; font-weight: 600;
+    text-decoration:none; padding: 9px 18px; border-radius: 999px; font-size: 0.88rem; white-space:nowrap;
   }
-  .discord-cta:hover{ background: var(--strawberry-deep); }
   .expiry-pill{
-    font-family:'Nunito';
-    font-weight: 800;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    padding: 5px 12px;
-    border-radius: 999px;
-    white-space: nowrap;
+    font-family:'Nunito'; font-weight: 800; font-size: 0.68rem; text-transform: uppercase;
+    letter-spacing: 0.03em; padding: 4px 11px; border-radius: 999px; white-space: nowrap;
   }
   .expiry-ok{ background: #E3F3E1; color: #3C7A3F; }
   .expiry-soon{ background: #FDECC8; color: #9A6B0A; }
   .expiry-over{ background: #FBDADA; color: #B23A3A; }
 
-
-  .filters{
-    max-width: 980px;
-    margin: 30px auto 0;
-    padding: 0 24px;
-    display:flex;
-    gap: 10px;
-    flex-wrap: wrap;
+  /* ---------- Next up strip (themed) ---------- */
+  .next-up{
+    margin-top: 14px;
+    background: var(--t-ink, #5B3A29);
+    color: var(--t-card, #FFF7EC);
+    border-radius: var(--t-radius, 18px);
+    padding: 14px 20px;
+    display:flex; align-items:center; gap: 14px; flex-wrap: wrap;
+    border: 2px solid var(--t-border, transparent);
   }
-  .filter-btn{
-    border: 2px solid var(--line);
-    background: #fff;
-    color: var(--cocoa-soft);
-    font-family:'Nunito';
-    font-weight: 700;
+  .next-up .label{
+    font-family: var(--t-heading, 'Fredoka'); font-size: 0.68rem; text-transform:uppercase;
+    letter-spacing:0.06em; color: var(--side-accent); display:block; margin-bottom:2px;
+  }
+  .next-up .title{ font-family: var(--t-heading, 'Fredoka'); font-size: 1.05rem; margin:0; }
+  .next-up .when{ opacity: 0.75; font-size: 0.85rem; }
+  .next-up .pill{
+    margin-left:auto; background: var(--side-accent); color:#fff;
+    font-family:'Fredoka'; font-weight:600; padding: 8px 16px;
+    border-radius:999px; font-size:0.85rem; white-space:nowrap;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend{ display:flex; flex-wrap:wrap; gap: 10px 16px; margin: 18px 4px 6px; justify-content:center; }
+  .legend-item{ display:flex; align-items:center; gap:6px; font-size:0.78rem; color: var(--t-ink-soft, var(--cocoa-soft)); font-weight:700; }
+  .legend-dot{ width:11px; height:11px; display:inline-block; }
+  body[data-theme="official"] .legend-dot{ border-radius: 3px; transform: rotate(-4deg); }
+  body[data-theme="ours"] .legend-dot{ border-radius: 50%; box-shadow: 0 0 0 2px rgba(212,175,55,0.25); }
+
+  /* ---------- Calendar ---------- */
+  .cal-nav{ display:flex; align-items:center; justify-content:center; gap: 18px; margin: 10px 0 10px; }
+  .cal-nav button{
+    border: 2px solid var(--t-border, var(--line)); background: var(--t-card, #fff); color: var(--t-ink, var(--cocoa));
+    width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; font-family:'Fredoka'; line-height:1;
+  }
+  .cal-nav button:hover{ border-color: var(--side-accent); color: var(--side-accent); }
+  .cal-nav .cal-month{ font-family: var(--t-heading, 'Fredoka'); font-size:1.15rem; min-width: 170px; text-align:center; color: var(--t-ink, var(--cocoa)); }
+
+  .cal-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px; }
+  .cal-dow{
+    text-align:center; font-family: var(--t-heading, 'Fredoka'); font-size:0.7rem;
+    text-transform:uppercase; color: var(--t-ink-soft, var(--cocoa-soft)); padding-bottom: 4px;
+  }
+  .cal-cell{
+    background: var(--t-card, #fff);
+    border: 2px solid var(--t-border, var(--line));
+    border-radius: var(--t-radius, 12px);
+    min-height: 74px;
+    padding: 5px;
+    cursor: default;
+    transition: border-color .15s ease, transform .15s ease;
+    overflow:hidden;
+  }
+  .cal-cell.blank{ background:transparent; border-color:transparent; }
+  .cal-cell.has-events{ cursor:pointer; }
+  .cal-cell.has-events:hover{ border-color: var(--side-accent); transform: translateY(-2px); }
+  .cal-cell.selected{ border-color: var(--side-accent); box-shadow: 0 0 0 2px var(--side-accent) inset; }
+  .cal-cell.today .cal-daynum{
+    background: var(--side-accent); color:#fff; border-radius:50%;
+    width:19px; height:19px; display:inline-flex; align-items:center; justify-content:center;
+  }
+  .cal-daynum{ font-family: var(--t-heading, 'Fredoka'); font-size:0.78rem; color: var(--t-ink, var(--cocoa)); }
+
+  /* Official: marker-style labels inside the cell, like the source schedule graphic */
+  .cal-tags{ margin-top: 4px; display:flex; flex-direction:column; gap:2px; }
+  .cal-tag{
+    font-family:'Nunito'; font-weight: 800; font-size: 0.56rem; text-transform:uppercase;
+    letter-spacing: 0.01em; color: #fff; padding: 1px 5px; border-radius: 4px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  /* Ours: minimal gold star marker instead of a filled label */
+  .cal-star{ margin-top: 6px; text-align:center; color: var(--side-accent); font-size: 0.85rem; }
+
+  /* ---------- General sign-up notice (one static banner, not per-date) ---------- */
+  .signup-notice{
+    display:flex; align-items:flex-start; gap:10px;
+    background: var(--t-card, #fff);
+    border: 1.5px dashed var(--side-accent);
+    border-radius: var(--t-radius, 14px);
+    padding: 12px 16px;
+    margin: 4px 0 18px;
     font-size: 0.85rem;
-    padding: 8px 16px;
-    border-radius: 999px;
-    cursor:pointer;
-    transition: all .15s ease;
+    color: var(--t-ink-soft, var(--cocoa-soft));
   }
-  .filter-btn:hover{ border-color: var(--strawberry-deep); color: var(--strawberry-deep); }
-  .filter-btn.active{
-    background: var(--cocoa);
-    border-color: var(--cocoa);
-    color: var(--cream);
-  }
+  .signup-notice .sn-icon{ font-size: 1.1rem; flex-shrink:0; }
 
-  /* ---------- Timeline ---------- */
-  .timeline{
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 30px 24px 100px;
+  /* ---------- Day detail panel ---------- */
+  .day-panel{ margin-top: 16px; }
+  .day-panel-empty{
+    text-align:center; color: var(--t-ink-soft, var(--cocoa-soft)); font-size:0.88rem;
+    padding: 22px; border: 2px dashed var(--t-border, var(--line)); border-radius: var(--t-radius, 16px);
   }
-
-  .month-heading{
-    font-family:'Fredoka', sans-serif;
-    font-size: 1.1rem;
-    color: var(--strawberry-deep);
-    margin: 40px 0 16px;
-    display:flex;
-    align-items:center;
-    gap: 12px;
-  }
-  .month-heading:first-child{ margin-top: 0; }
-  .month-heading::after{
-    content:"";
-    flex:1;
-    height: 2px;
-    background: var(--line);
-  }
-
   .event-card{
-    position: relative;
-    display:grid;
-    grid-template-columns: 88px 1fr auto;
-    gap: 20px;
-    align-items:center;
-    background: #fff;
-    border: 2px solid var(--line);
-    border-radius: 20px;
-    padding: 16px 20px;
-    margin-bottom: 14px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    transition: transform .15s ease, border-color .15s ease;
+    position:relative;
+    background: var(--t-card, #fff);
+    border: 2px solid var(--t-border, var(--line));
+    border-radius: var(--t-radius, 16px);
+    padding: 14px 16px; margin-bottom: 10px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    overflow:hidden;
+    color: var(--t-ink, var(--cocoa));
   }
-  .event-card::before{
-    content:"";
-    position:absolute;
-    top:-18px; right:-18px;
-    width: 46px; height: 46px;
-    background: linear-gradient(135deg, #fff8 0%, #fff0 40%, var(--butter) 60%, var(--strawberry) 100%);
-    transform: rotate(45deg);
-    opacity: 0.55;
-    transition: opacity .15s ease, transform .3s ease;
+  body[data-theme="official"] .event-card::before{
+    content:""; position:absolute; top:-16px; right:-16px; width:40px; height:40px;
+    background: linear-gradient(135deg, #fff8 0%, #fff0 40%, #FFC857 60%, #FF8FA3 100%);
+    transform: rotate(45deg); opacity:.5;
   }
-  .event-card:hover::before{
-    opacity: 0.9;
-    transform: rotate(45deg) scale(1.15);
-  }
-  .event-card:hover{
-    transform: translateY(-3px);
-    border-color: var(--strawberry);
-  }
-  .event-card.past{
-    opacity: 0.5;
-  }
+  body[data-theme="ours"] .event-card{ border-left: 3px solid var(--side-accent); }
 
-  .date-chip{
-    background: var(--cream-deep);
-    border-radius: 14px;
-    text-align:center;
-    padding: 10px 4px;
-    font-family:'Fredoka', sans-serif;
-    color: var(--cocoa);
+  .type-badge{
+    display:inline-block; font-family: var(--t-heading, 'Fredoka'); font-size:0.64rem; text-transform:uppercase;
+    letter-spacing:0.05em; font-weight:600; padding:3px 10px; border-radius: 999px;
+    margin-bottom:6px; color:#fff;
   }
-  .date-chip .dow{ font-size: 0.68rem; text-transform:uppercase; color: var(--cocoa-soft); font-weight:600; }
-  .date-chip .dnum{ font-size: 1.5rem; font-weight: 600; line-height:1.1; }
-  .date-chip .mon{ font-size: 0.7rem; text-transform:uppercase; color: var(--cocoa-soft); }
+  body[data-theme="official"] .type-badge{ border-radius: 5px; transform: rotate(-1deg); }
 
-  .event-info .type-badge{
-    display:inline-block;
-    font-family:'Fredoka';
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 999px;
-    margin-bottom: 6px;
-    color: #fff;
-  }
-  .badge-tournament{ background: var(--strawberry-deep); }
-  .badge-party{ background: var(--mint-deep); }
-  .badge-signup{ background: var(--butter-deep); color: var(--cocoa); }
-  .badge-reminder{ background: var(--slate); }
-  .badge-competitive{ background: var(--teal); }
-  .badge-casual{ background: var(--coral-deep); }
-  .badge-themed{ background: var(--lavender-deep); }
-  .badge-community{ background: var(--leaf-deep); }
+  .badge-tournament{ background: #FF6B88; }
+  .badge-party{ background: #5FBFA0; }
+  .badge-signup{ background: #F0AE2E; color: #4A3524; }
+  .badge-reminder{ background: #7C93C4; }
+  .badge-competitive{ background: #3FA9A0; }
+  .badge-casual{ background: #FF8A65; }
+  .badge-community{ background: #6FA332; }
+  .badge-milestone{ background: #FF8FA3; }
 
   .status-pill{
-    display:inline-block;
-    font-family:'Nunito';
-    font-size: 0.68rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 2px 9px;
-    border-radius: 999px;
-    margin-bottom: 6px;
-    margin-left: 6px;
-    background: transparent;
-    border: 2px dashed var(--cocoa-soft);
-    color: var(--cocoa-soft);
+    display:inline-block; font-family:'Nunito'; font-size:0.63rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:0.04em; padding:2px 9px; border-radius:999px;
+    margin-bottom:6px; margin-left:6px; border:2px dashed var(--t-ink-soft, var(--cocoa-soft)); color:var(--t-ink-soft, var(--cocoa-soft));
   }
-
-  .event-info h3{
-    margin: 0 0 4px;
-    font-size: 1.08rem;
-  }
-  .event-info .time{
-    font-size: 0.85rem;
-    color: var(--cocoa-soft);
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .event-info p{
-    margin: 0;
-    font-size: 0.92rem;
-    color: var(--cocoa-soft);
-    line-height:1.45;
-  }
-
-  .event-side{
-    text-align:right;
-    display:flex;
-    flex-direction:column;
-    align-items:flex-end;
-    gap:8px;
-  }
-  .days-away{
-    font-family:'Fredoka';
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--strawberry-deep);
-    white-space:nowrap;
-  }
+  .event-card h3{ margin: 0 0 3px; font-size: 1.02rem; font-family: var(--t-heading, 'Fredoka'); }
+  .event-card .time{ font-size:0.82rem; color: var(--t-ink-soft, var(--cocoa-soft)); font-weight:700; margin-bottom:4px; }
+  .event-card p{ margin:0; font-size:0.88rem; color: var(--t-ink-soft, var(--cocoa-soft)); line-height:1.4; }
   .event-link{
-    font-size: 0.82rem;
-    font-weight: 800;
-    text-decoration: none;
-    color: var(--cocoa);
-    border-bottom: 2px solid var(--butter);
-    white-space:nowrap;
-  }
-  .event-link:hover{ color: var(--strawberry-deep); border-color: var(--strawberry-deep); }
-
-  .empty-state{
-    text-align:center;
-    padding: 60px 20px;
-    color: var(--cocoa-soft);
-  }
-  .empty-state .display{ font-size:1.3rem; color:var(--cocoa); margin-bottom:6px; }
-
-  footer{
-    text-align:center;
-    padding: 30px 20px 50px;
-    color: var(--cocoa-soft);
-    font-size: 0.8rem;
+    display:inline-block; margin-top:8px; font-size:0.82rem; font-weight:800;
+    text-decoration:none; color: var(--side-accent); border-bottom: 2px solid var(--side-accent);
   }
 
-  @media (max-width: 720px){
-    .hero{ grid-template-columns: 1fr; text-align:center; }
-    .hero p{ margin: 0 auto; }
-    .jar-wrap{ margin: 0 auto; width: 130px; }
-    .event-card{ grid-template-columns: 64px 1fr; }
-    .event-side{ grid-column: 1 / -1; flex-direction:row; justify-content:space-between; align-items:center; margin-top: 6px; }
-    .countdown-pill{ margin-left: 0; }
-    .next-up-card{ flex-direction:column; align-items:flex-start; }
-  }
+  footer{ text-align:center; padding: 34px 20px 10px; color: var(--cocoa-soft); font-size: 0.78rem; }
+  body[data-theme="ours"] footer{ color: #C9AFC0; }
 
-  @media (prefers-reduced-motion: reduce){
-    .jar-cookie{ animation: none; }
+  @media (max-width: 560px){
+    .cal-cell{ min-height: 58px; }
+    .cal-tag{ font-size: 0.5rem; }
+    .side-switch{ gap:8px; }
+    .side-btn{ padding: 12px 8px; }
   }
 </style>
 </head>
@@ -454,180 +317,158 @@
 
 <div class="sprinkle-bar"></div>
 
-<div class="hero">
-  <div>
-    <span class="hero-eyebrow">🍪 Community Kept, Community Fed</span>
-    <h1>Every party, every<br><span>tournament</span>, one jar.</h1>
-    <p>A running list of upcoming sign-up windows, webcam tournaments, and community parties — so nobody has to guess when the next date drops.</p>
+<div class="wrap">
+
+  <div class="page-head">
+    <h1>🍪 The Cookie Jar</h1>
+    <p>Pick a side, then tap a highlighted date to see what's happening.</p>
   </div>
-  <div class="jar-wrap">
-    <svg viewBox="0 0 160 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="80" cy="190" rx="46" ry="8" fill="#5B3A29" opacity="0.12"/>
-      <rect x="34" y="46" width="92" height="128" rx="20" fill="#FFF2DE" stroke="#5B3A29" stroke-width="4"/>
-      <rect x="30" y="30" width="100" height="24" rx="10" fill="#FF8FA3" stroke="#5B3A29" stroke-width="4"/>
-      <rect x="54" y="14" width="52" height="18" rx="6" fill="#8FD8C0" stroke="#5B3A29" stroke-width="4"/>
-      <g class="jar-cookie">
-        <circle cx="62" cy="90" r="15" fill="#F0AE2E" stroke="#5B3A29" stroke-width="3"/>
-        <circle cx="57" cy="86" r="2" fill="#5B3A29"/>
-        <circle cx="67" cy="92" r="2" fill="#5B3A29"/>
-        <circle cx="60" cy="96" r="2" fill="#5B3A29"/>
-      </g>
-      <g class="jar-cookie">
-        <circle cx="98" cy="110" r="17" fill="#FF6B88" stroke="#5B3A29" stroke-width="3"/>
-        <circle cx="92" cy="105" r="2.2" fill="#5B3A29"/>
-        <circle cx="104" cy="108" r="2.2" fill="#5B3A29"/>
-        <circle cx="96" cy="116" r="2.2" fill="#5B3A29"/>
-      </g>
-      <g class="jar-cookie">
-        <circle cx="70" cy="138" r="16" fill="#A88FD1" stroke="#5B3A29" stroke-width="3"/>
-        <circle cx="64" cy="134" r="2.1" fill="#5B3A29"/>
-        <circle cx="76" cy="136" r="2.1" fill="#5B3A29"/>
-        <circle cx="68" cy="144" r="2.1" fill="#5B3A29"/>
-      </g>
-    </svg>
+
+  <div class="side-switch" id="side-switch"></div>
+
+  <div class="theme-region">
+    <div id="theme-decoration"></div>
+    <div id="discord-wrap"></div>
+    <div id="next-up-wrap"></div>
+    <div class="legend" id="legend"></div>
+    <div id="signup-notice-wrap"></div>
+
+    <div class="cal-nav">
+      <button id="cal-prev" aria-label="Previous month">←</button>
+      <span class="cal-month" id="cal-month-label"></span>
+      <button id="cal-next" aria-label="Next month">→</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+
+    <div class="day-panel" id="day-panel"></div>
   </div>
+
+  <footer>Made with 🍪 for the community. Dates are unofficial — always double check with official channels.</footer>
 </div>
-
-<div class="next-up" id="next-up-wrap"></div>
-
-<div class="discord-wrap" id="discord-wrap"></div>
-
-<div class="frosting-divider"></div>
-
-<div class="filters" id="filters">
-  <button class="filter-btn active" data-filter="all">All events</button>
-  <button class="filter-btn" data-filter="competitive">⚔️ Competitive</button>
-  <button class="filter-btn" data-filter="casual">☁️ Casual</button>
-  <button class="filter-btn" data-filter="themed">🎨 Themed</button>
-  <button class="filter-btn" data-filter="community">🌈 Community Day</button>
-  <button class="filter-btn" data-filter="tournament">🏆 Tournaments</button>
-  <button class="filter-btn" data-filter="party">🎉 Parties</button>
-  <button class="filter-btn" data-filter="signup">📝 Sign-ups</button>
-  <button class="filter-btn" data-filter="reminder">⏰ Reminders</button>
-</div>
-
-<div class="timeline" id="timeline"></div>
-
-<footer>Made with 🍪 for the community. Dates are unofficial — always double check with DevSisters' official channels.</footer>
 
 <script>
 
 /* ============================================================
-   🍪 YOUR DISCORD INVITE 🍪
-   ------------------------------------------------------------
-   This is the link shown in the banner near the top of the page.
-   Discord invite links you generate normally expire after a set
-   number of days — fill in when you grabbed it and how many days
-   it lasts, and the page calculates the countdown for you.
-
-   url          -> your invite link
-   updated      -> the date (YYYY-MM-DD) you grabbed this link
-   expiresInDays-> how many days until it expires (Discord's
-                   default options are 30, 7, 1, or "never" —
-                   use a big number like 3650 if yours never expires)
-   ============================================================ */
-
-const DISCORD_INVITE = {
-  url: "https://discord.gg/QWQAqDH6T",
-  updated: "2026-07-23",
-  expiresInDays: 30
-};
-
-/* ============================================================
    🍪 ADD YOUR EVENTS HERE 🍪
    ------------------------------------------------------------
-   Copy one block below (from the { to the },) and edit it.
-   Then paste it anywhere in the list. Order doesn't matter —
-   the page sorts everything by date automatically.
+   There are two sides: "official" (CookieRun Braverse) and
+   "ours" (Michelin Star Cookies). Each has its own label, its
+   own Discord invite, and two kinds of events:
 
-   FIELDS:
-   title  -> name of the event, e.g. "Competitive Weekend"
-   date   -> "YYYY-MM-DD"  (year-month-day, always 2 digits)
+   1) "recurring" — things that repeat on the same weekday every
+      week, forever (e.g. Casual is always Wednesday). List these
+      once and the calendar fills them in automatically on every
+      matching date, past and future.
+
+   2) "events" — one-time things with a specific date (e.g. a
+      season launch, a special community day).
+
+   Both kinds use the same field names:
+   title  -> name of the event
    time   -> whatever text you want shown, e.g. "3:00 PM EST"
-   type   -> one of: "competitive", "casual", "themed", "community",
-             "tournament", "party", "signup", "reminder"
+             (use "All day" if there's no specific time)
+   type   -> "competitive", "casual", "community",
+             "tournament", "party", "signup", "reminder",
+             or "milestone" (for things like "Season 3 begins")
    desc   -> a short sentence about the event
-   link   -> a URL people can click (Discord invite, sign-up page,
-             announcement post, etc). Leave as "" for none.
-             If the URL contains "discord", the button
-             automatically says "Join Discord →" instead of
-             "Details →".
-   status -> "confirmed" or "predicted". OPTIONAL — if you leave
-             it out, it's treated as "confirmed".
-             Use "predicted" when you're marking a date based on
-             the pattern (since they don't announce in advance)
-             — it'll show a dashed "Predicted" tag next to the
-             event so everyone knows it's your best guess, not
-             official yet. Once they confirm it, just delete the
-             status line (or change it to "confirmed").
+   link   -> a URL (or "" for none). Discord links auto-label
+             their button "Join Discord →"
+   status -> optional. "predicted" shows a dashed "Predicted"
+             tag for dates you're estimating. Leave it out, or
+             use "confirmed", once it's official.
+
+   RECURRING EVENTS also need:
+   weekday -> which day it repeats on: 0=Sun, 1=Mon, 2=Tue,
+              3=Wed, 4=Thu, 5=Fri, 6=Sat
+
+   ONE-TIME EVENTS also need:
+   date -> "YYYY-MM-DD"
+
+   TIP: want to add a special note to just ONE occurrence of a
+   recurring event (like "Casual Day, but with double rewards"
+   on one specific Wednesday)? Add a one-time event in "events"
+   with the same date and the same type — it'll automatically
+   replace the generic recurring one for that date only.
+
+   DISCORD INVITE for each side:
+   url           -> the invite link
+   updated       -> date (YYYY-MM-DD) you grabbed the link
+   expiresInDays -> how many days it lasts (30, 7, 1, or a big
+                    number like 3650 if it never expires)
+
+   SIGN-UP NOTICE (optional, per side):
+   signupHeadsUp -> a number. If set, a small dashed notice card
+                    appears once (not repeated on every date) that
+                    says sign-ups tend to open about that many days
+                    before an event. Good for a side whose sign-ups
+                    open on an unpredictable schedule. Leave it out
+                    to turn this off for a side.
    ============================================================ */
 
-const EVENTS = [
-  {
-    title: "Signups Likely Open",
-    date: "2026-08-01",
-    time: "Time TBD",
-    type: "signup",
-    desc: "Based on the usual pattern, this is when sign-ups probably open. Not officially announced yet.",
-    link: "https://discord.gg/yourservercode",
-    status: "predicted"
+const SIDES = {
+
+  official: {
+    label: "CookieRun Braverse",
+    sublabel: "Official",
+    icon: "🍪",
+    accent: "#C48FE0",
+    signupHeadsUp: 7,
+    discord: {
+      url: "https://discord.gg/QWQAqDH6T",
+      updated: "2026-07-23",
+      expiresInDays: 30
+    },
+    recurring: [
+      { weekday: 3, title: "Casual Day", type: "casual", time: "All day", desc: "Casual mode day. Happens every Wednesday." },
+      { weekday: 6, title: "Competitive Weekend", type: "competitive", time: "All day", desc: "Competitive-mode day. Happens every Saturday." }
+    ],
+    events: [
+      { title: "Season 3 Begins", date: "2026-07-13", time: "All day", type: "milestone", desc: "Season 3 officially kicks off.", link: "" },
+      { title: "FREE — Learn to Play Community Day", date: "2026-08-15", time: "All day", type: "community", desc: "Open, free community day for newer players.", link: "" }
+    ]
   },
-  {
-    title: "Competitive Weekend",
-    date: "2026-08-08",
-    time: "All day",
-    type: "competitive",
-    desc: "Competitive-mode weekend, per the official schedule.",
-    link: "https://discord.gg/yourservercode"
-  },
-  {
-    title: "Themed Event",
-    date: "2026-08-12",
-    time: "All day",
-    type: "themed",
-    desc: "Themed event day.",
-    link: ""
-  },
-  {
-    title: "FREE — Learn to Play Community Day",
-    date: "2026-08-15",
-    time: "All day",
-    type: "community",
-    desc: "Open, free community day for newer players to learn the ropes.",
-    link: "https://discord.gg/yourservercode"
-  },
-  {
-    title: "Sign-up Deadline (Predicted)",
-    date: "2026-08-27",
-    time: "11:59 PM EST",
-    type: "reminder",
-    desc: "Estimated cutoff based on past cycles — confirm once they post the official announcement.",
-    link: "",
-    status: "predicted"
+
+  ours: {
+    label: "Michelin Star Cookies",
+    sublabel: "Us",
+    icon: "⭐",
+    accent: "#D4AF37",
+    discord: {
+      url: "https://discord.gg/2bPkf8rFh",
+      updated: "2026-07-23",
+      expiresInDays: 30
+    },
+    recurring: [],
+    events: [
+      { title: "🎁 End-of-Month Giveaway Drawing", date: "2026-07-31", time: "In Discord", type: "reminder", desc: "Sign-ups are open now for all server members — make sure you've entered before the drawing happens tonight in Discord.", link: "https://discord.gg/2bPkf8rFh" }
+    ]
   }
-];
+};
 
 /* ============================================================
    Nothing below this line needs to be edited.
    ============================================================ */
 
-const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const BADGE_LABEL = {
+const TYPE_LABEL = {
   tournament:"Tournament", party:"Party", signup:"Sign-up", reminder:"Reminder",
-  competitive:"Competitive", casual:"Casual", themed:"Themed", community:"Community Day"
+  competitive:"Competitive", casual:"Casual", community:"Community Day",
+  milestone:"Milestone"
 };
+const TYPE_COLOR = {
+  tournament:"#FF6B88", party:"#5FBFA0", signup:"#F0AE2E", reminder:"#7C93C4",
+  competitive:"#3FA9A0", casual:"#FF8A65", community:"#6FA332", milestone:"#FF8FA3"
+};
+
+let activeSide = "official";
+let calYear, calMonth; // 0-indexed month
+let selectedDateKey = null;
 
 function parseLocalDate(str){
   const [y,m,d] = str.split("-").map(Number);
   return new Date(y, m-1, d);
 }
-
-function startOfToday(){
-  const t = new Date();
-  return new Date(t.getFullYear(), t.getMonth(), t.getDate());
-}
-
+function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+function startOfToday(){ const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
 function daysAwayText(target, today){
   const diff = Math.round((target - today) / 86400000);
   if(diff === 0) return "Today!";
@@ -636,92 +477,99 @@ function daysAwayText(target, today){
   if(diff === -1) return "Yesterday";
   return `${Math.abs(diff)} days ago`;
 }
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
 
-let activeFilter = "all";
+function currentSideData(){ return SIDES[activeSide]; }
 
-function render(){
-  const today = startOfToday();
-  const sorted = [...EVENTS].sort((a,b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+/* Returns every event happening on a given date for a given side —
+   combining one-time events with recurring weekly ones. A one-time
+   event on the same date + type as a recurring rule overrides it,
+   so you can add a special note to a single week without disabling
+   the whole pattern. */
+function occurrencesForDate(side, d){
+  const key = dateKey(d);
+  const wd = d.getDay();
+  const oneOff = side.events.filter(e => e.date === key);
+  const overriddenTypes = new Set(oneOff.map(e => e.type));
+  const recurring = (side.recurring || [])
+    .filter(r => r.weekday === wd && !overriddenTypes.has(r.type))
+    .map(r => ({ title: r.title, time: r.time, type: r.type, desc: r.desc, link: r.link || "", status: r.status, date: key }));
+  return [...oneOff, ...recurring];
+}
 
-  // Next up banner: soonest event that is today or in the future
-  const upcoming = sorted.filter(e => parseLocalDate(e.date) >= today);
-  const nextUpWrap = document.getElementById("next-up-wrap");
-  if(upcoming.length){
-    const n = upcoming[0];
-    const nd = parseLocalDate(n.date);
-    nextUpWrap.innerHTML = `
-      <div class="next-up-card">
-        <div>
-          <span class="label">Next up</span>
-          <p class="title">${escapeHtml(n.title)}</p>
-          <div class="when">${nd.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'})} · ${escapeHtml(n.time)}</div>
-        </div>
-        <div class="countdown-pill">${daysAwayText(nd, today)}</div>
-      </div>`;
+function findNextOccurrence(side, today){
+  for(let i = 0; i < 60; i++){
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    const occ = occurrencesForDate(side, d);
+    if(occ.length) return { date: d, events: occ };
+  }
+  return null;
+}
+
+function setTheme(){
+  const s = currentSideData();
+  document.body.dataset.theme = activeSide;
+  document.documentElement.style.setProperty("--side-accent", s.accent);
+
+  const deco = document.getElementById("theme-decoration");
+  if(activeSide === "official"){
+    deco.innerHTML = `<div class="mascot-wrap">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="42" fill="#D9A65B" stroke="#4A3524" stroke-width="4"/>
+        <circle cx="34" cy="40" r="4.5" fill="#4A3524"/>
+        <circle cx="66" cy="40" r="4.5" fill="#4A3524"/>
+        <circle cx="26" cy="55" r="5" fill="#8A5A2B"/>
+        <circle cx="50" cy="66" r="5" fill="#8A5A2B"/>
+        <circle cx="72" cy="52" r="5" fill="#8A5A2B"/>
+        <circle cx="40" cy="30" r="4" fill="#8A5A2B"/>
+        <circle cx="62" cy="28" r="4" fill="#8A5A2B"/>
+        <path d="M38 60 Q50 70 62 60" stroke="#4A3524" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="26" cy="48" r="4" fill="#FF9EAE" opacity="0.7"/>
+        <circle cx="74" cy="48" r="4" fill="#FF9EAE" opacity="0.7"/>
+      </svg>
+    </div>`;
   } else {
-    nextUpWrap.innerHTML = "";
+    deco.innerHTML = `<div class="star-rule">★ ★ ★ ★ ★</div>`;
   }
+}
 
-  // Filtered list
-  const filtered = sorted.filter(e => activeFilter === "all" || e.type === activeFilter);
-
-  const timeline = document.getElementById("timeline");
-  if(!filtered.length){
-    timeline.innerHTML = `<div class="empty-state"><div class="display">The jar is empty 🍪</div><p>No events in this category yet.</p></div>`;
-    return;
-  }
-
-  let html = "";
-  let lastMonthKey = "";
-  filtered.forEach(e => {
-    const d = parseLocalDate(e.date);
-    const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
-    if(monthKey !== lastMonthKey){
-      html += `<div class="month-heading">${MON[d.getMonth()]} ${d.getFullYear()}</div>`;
-      lastMonthKey = monthKey;
-    }
-    const isPast = d < today;
-    html += `
-      <div class="event-card ${isPast ? "past" : ""}">
-        <div class="date-chip">
-          <div class="dow">${DOW[d.getDay()]}</div>
-          <div class="dnum">${d.getDate()}</div>
-          <div class="mon">${MON[d.getMonth()].slice(0,3)}</div>
-        </div>
-        <div class="event-info">
-          <span class="type-badge badge-${e.type}">${BADGE_LABEL[e.type] || e.type}</span>
-          ${e.status === "predicted" ? `<span class="status-pill">🔮 Predicted</span>` : ""}
-          <h3>${escapeHtml(e.title)}</h3>
-          <div class="time">${escapeHtml(e.time)}</div>
-          <p>${escapeHtml(e.desc)}</p>
-        </div>
-        <div class="event-side">
-          <div class="days-away">${daysAwayText(d, today)}</div>
-          ${e.link ? `<a class="event-link" href="${escapeAttr(e.link)}" target="_blank" rel="noopener">${e.link.toLowerCase().includes("discord") ? "Join Discord →" : "Details →"}</a>` : ""}
-        </div>
-      </div>`;
+function renderSideSwitch(){
+  const wrap = document.getElementById("side-switch");
+  wrap.innerHTML = Object.keys(SIDES).map(key => {
+    const s = SIDES[key];
+    return `<button class="side-btn ${key === activeSide ? "active" : ""}" data-side="${key}">
+      <span class="sb-icon">${s.icon}</span>
+      <span class="sb-label">${escapeHtml(s.label)}</span>
+      <span class="sb-sub">${escapeHtml(s.sublabel)}</span>
+    </button>`;
+  }).join("");
+  wrap.querySelectorAll(".side-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activeSide = btn.dataset.side;
+      selectedDateKey = null;
+      goToRelevantMonth();
+      renderAll();
+    });
   });
-  timeline.innerHTML = html;
 }
 
 function renderDiscordBanner(){
+  const s = currentSideData();
   const wrap = document.getElementById("discord-wrap");
-  if(!DISCORD_INVITE || !DISCORD_INVITE.url){ wrap.innerHTML = ""; return; }
+  if(!s.discord || !s.discord.url){ wrap.innerHTML = ""; return; }
 
   const today = startOfToday();
-  const updated = parseLocalDate(DISCORD_INVITE.updated);
-  const expiry = new Date(updated.getTime() + DISCORD_INVITE.expiresInDays * 86400000);
+  const updated = parseLocalDate(s.discord.updated);
+  const expiry = new Date(updated.getTime() + s.discord.expiresInDays * 86400000);
   const daysLeft = Math.round((expiry - today) / 86400000);
 
-  let pillClass = "expiry-ok";
-  let pillText = `🔗 Active · expires in ${daysLeft} days`;
-  if(daysLeft <= 0){
-    pillClass = "expiry-over";
-    pillText = "⚠️ May be expired — grab a new link!";
-  } else if(daysLeft <= 5){
-    pillClass = "expiry-soon";
-    pillText = `⏳ Expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"} — renew soon`;
-  }
+  let pillClass = "expiry-ok", pillText = `🔗 Active · expires in ${daysLeft} days`;
+  if(daysLeft <= 0){ pillClass = "expiry-over"; pillText = "⚠️ May be expired"; }
+  else if(daysLeft <= 5){ pillClass = "expiry-soon"; pillText = `⏳ Expires in ${daysLeft}d`; }
 
   wrap.innerHTML = `
     <div class="discord-card">
@@ -732,30 +580,164 @@ function renderDiscordBanner(){
         </svg>
       </div>
       <div class="discord-text">
-        <p class="dt-title">Join the community Discord</p>
-        <div class="dt-sub">Sign-up announcements, tournament brackets, and chat happen here.</div>
+        <p class="dt-title">${escapeHtml(s.label)} Discord</p>
+        <div class="dt-sub">Announcements and chat happen here.</div>
       </div>
       <span class="expiry-pill ${pillClass}">${pillText}</span>
-      <a class="discord-cta" href="${escapeAttr(DISCORD_INVITE.url)}" target="_blank" rel="noopener">Join Discord →</a>
+      <a class="discord-cta" href="${escapeAttr(s.discord.url)}" target="_blank" rel="noopener">Join Discord →</a>
     </div>`;
 }
 
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function renderNextUp(){
+  const s = currentSideData();
+  const today = startOfToday();
+  const wrap = document.getElementById("next-up-wrap");
+  const next = findNextOccurrence(s, today);
+  if(!next){ wrap.innerHTML = ""; return; }
+  const n = next.events[0];
+  const nd = next.date;
+  wrap.innerHTML = `
+    <div class="next-up">
+      <div>
+        <span class="label">Next up · ${escapeHtml(s.label)}</span>
+        <p class="title">${escapeHtml(n.title)}</p>
+        <div class="when">${nd.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'})} · ${escapeHtml(n.time)}</div>
+      </div>
+      <span class="pill">${daysAwayText(nd, today)}</span>
+    </div>`;
 }
-function escapeAttr(str){ return escapeHtml(str); }
 
-document.getElementById("filters").addEventListener("click", (ev) => {
-  const btn = ev.target.closest(".filter-btn");
-  if(!btn) return;
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  activeFilter = btn.dataset.filter;
-  render();
+function renderLegend(){
+  const s = currentSideData();
+  const typesUsed = [...new Set([
+    ...s.events.map(e => e.type),
+    ...(s.recurring || []).map(r => r.type)
+  ])];
+  const legend = document.getElementById("legend");
+  legend.innerHTML = typesUsed.map(t => `
+    <span class="legend-item">
+      <span class="legend-dot" style="background:${TYPE_COLOR[t] || "#8A6650"}"></span>
+      ${escapeHtml(TYPE_LABEL[t] || t)}
+    </span>`).join("");
+}
+
+function renderSignupNotice(){
+  const s = currentSideData();
+  const wrap = document.getElementById("signup-notice-wrap");
+  if(!s.signupHeadsUp){ wrap.innerHTML = ""; return; }
+  wrap.innerHTML = `
+    <div class="signup-notice">
+      <span class="sn-icon">👀</span>
+      <span>Sign-ups for ${escapeHtml(s.label)} events tend to open around <strong>${s.signupHeadsUp} days</strong> in advance and aren't always announced ahead of time. It's worth checking the Discord regularly, especially in the week before a Casual or Competitive day.</span>
+    </div>`;
+}
+
+function goToRelevantMonth(){
+  const s = currentSideData();
+  const today = startOfToday();
+  const next = findNextOccurrence(s, today);
+  const target = next ? next.date : today;
+  calYear = target.getFullYear();
+  calMonth = target.getMonth();
+}
+
+const DOW_MON_FIRST = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const MON_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function renderCalendar(){
+  const s = currentSideData();
+  const today = startOfToday();
+
+  document.getElementById("cal-month-label").textContent = `${MON_NAMES[calMonth]} ${calYear}`;
+
+  const grid = document.getElementById("cal-grid");
+  let html = DOW_MON_FIRST.map(d => `<div class="cal-dow">${d}</div>`).join("");
+
+  const firstOfMonth = new Date(calYear, calMonth, 1);
+  const startOffset = (firstOfMonth.getDay() + 6) % 7; // Monday = 0
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  for(let i = 0; i < startOffset; i++){ html += `<div class="cal-cell blank"></div>`; }
+
+  for(let day = 1; day <= daysInMonth; day++){
+    const d = new Date(calYear, calMonth, day);
+    const key = dateKey(d);
+    const dayEvents = occurrencesForDate(s, d);
+    const isToday = key === dateKey(today);
+    const isSelected = key === selectedDateKey;
+
+    let innerContent;
+    if(activeSide === "official"){
+      const tags = dayEvents.slice(0,3).map(e =>
+        `<span class="cal-tag" style="background:${TYPE_COLOR[e.type] || "#8A6650"}">${escapeHtml(TYPE_LABEL[e.type] || e.type)}</span>`
+      ).join("");
+      innerContent = `<div class="cal-tags">${tags}</div>`;
+    } else {
+      innerContent = dayEvents.length ? `<div class="cal-star">★</div>` : "";
+    }
+
+    html += `
+      <div class="cal-cell ${dayEvents.length ? "has-events" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}" data-date="${key}">
+        <span class="cal-daynum">${day}</span>
+        ${innerContent}
+      </div>`;
+  }
+
+  grid.innerHTML = html;
+  grid.querySelectorAll(".cal-cell.has-events").forEach(cell => {
+    cell.addEventListener("click", () => {
+      selectedDateKey = (selectedDateKey === cell.dataset.date) ? null : cell.dataset.date;
+      renderCalendar();
+      renderDayPanel();
+    });
+  });
+}
+
+function renderDayPanel(){
+  const s = currentSideData();
+  const panel = document.getElementById("day-panel");
+  if(!selectedDateKey){
+    panel.innerHTML = `<div class="day-panel-empty">Tap a highlighted date above to see details ✨</div>`;
+    return;
+  }
+  const dayEvents = occurrencesForDate(s, parseLocalDate(selectedDateKey));
+  if(!dayEvents.length){ panel.innerHTML = ""; return; }
+
+  panel.innerHTML = dayEvents.map(e => `
+    <div class="event-card">
+      <span class="type-badge badge-${e.type}">${escapeHtml(TYPE_LABEL[e.type] || e.type)}</span>
+      ${e.status === "predicted" ? `<span class="status-pill">🔮 Predicted</span>` : ""}
+      <h3>${escapeHtml(e.title)}</h3>
+      <div class="time">${escapeHtml(e.time)}</div>
+      <p>${escapeHtml(e.desc)}</p>
+      ${e.link ? `<a class="event-link" href="${escapeAttr(e.link)}" target="_blank" rel="noopener">${e.link.toLowerCase().includes("discord") ? "Join Discord →" : "Details →"}</a>` : ""}
+    </div>`).join("");
+}
+
+document.getElementById("cal-prev").addEventListener("click", () => {
+  calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; }
+  selectedDateKey = null;
+  renderCalendar(); renderDayPanel();
+});
+document.getElementById("cal-next").addEventListener("click", () => {
+  calMonth++; if(calMonth > 11){ calMonth = 0; calYear++; }
+  selectedDateKey = null;
+  renderCalendar(); renderDayPanel();
 });
 
-render();
-renderDiscordBanner();
+function renderAll(){
+  setTheme();
+  renderSideSwitch();
+  renderDiscordBanner();
+  renderNextUp();
+  renderLegend();
+  renderSignupNotice();
+  renderCalendar();
+  renderDayPanel();
+}
+
+goToRelevantMonth();
+renderAll();
 </script>
 </body>
 </html>
